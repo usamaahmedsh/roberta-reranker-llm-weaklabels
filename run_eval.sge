@@ -35,8 +35,6 @@ module load cuda/12.8
 module load python3/3.10.12
 module load cmake/3.31.7
 
-export HF_TOKEN="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"
-
 source .venv/bin/activate
 
 # Start from scratch for outputs only
