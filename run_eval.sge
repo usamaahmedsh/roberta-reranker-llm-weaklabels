@@ -1,0 +1,50 @@
+#!/bin/bash -l
+#$ -P rhino-ffm
+
+# Resources
+#$ -l gpus=1
+#$ -l gpu_type=H200
+#$ -pe omp 8
+#$ -l h_rt=30:00:00
+
+# Job name
+#$ -N eval-comparison
+
+# IMPORTANT: directory must exist at submission time
+#$ -o logs/$JOB_NAME_$JOB_ID.out
+#$ -e logs/$JOB_NAME_$JOB_ID.err
+
+set -euo pipefail
+mkdir -p logs
+
+echo "[job] host=$(hostname) job_id=${JOB_ID:-unknown} job_name=${JOB_NAME:-unknown}"  # JOB_ID/JOB_NAME set by SGE. [web:203]
+
+# Go to project root (this is the key change)
+cd /project/rhino-ffm/reranker_ce
+
+# Threads: match OpenMP slots
+export OMP_NUM_THREADS=${NSLOTS:-8}   # NSLOTS is set by SGE for parallel jobs. [web:460]
+
+# Caches on scratch (persist across jobs; don’t rebuild/redownload every run)
+export IR_DATASETS_HOME=/scratch/$USER/ir_datasets
+export HF_HOME=/scratch/$USER/hf_cache   # HF_HOME relocates Hugging Face caches. [web:456]
+
+export TOKENIZERS_PARALLELISM=true
+
+module load cuda/12.8
+module load python3/3.10.12
+module load cmake/3.31.7
+
+export HF_TOKEN="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"
+
+source .venv/bin/activate
+
+# Start from scratch for outputs only
+rm -rf msmarco_eval_out
+mkdir -p msmarco_eval_out
+
+python scripts/eval_comparison.py \
+  --my_model runs/deberta_v3_bm25_mined_01/final_model \
+  --out_dir msmarco_eval_out \
+  --batch_size 2900 \
+  --topk_rerank 1000

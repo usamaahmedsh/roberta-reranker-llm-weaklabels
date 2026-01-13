@@ -1,0 +1,91 @@
+project_dir: /project/rhino-ffm/reranker_ce
+run_name: deberta_v3_bm25_mined_01
+
+# Persistent artifacts (raw+processed datasets, BM25 pickle, etc.)
+artifacts_dir: /project/rhino-ffm/reranker_ce/runs/deberta_v3_bm25_mined_01/artifacts
+
+# REQUIRED: training loads tokenized dataset from here (stable path)
+pretokenized_dir: /project/rhino-ffm/reranker_ce/runs/deberta_v3_bm25_mined_01/artifacts/pretokenized
+
+# Synthetic weak labels
+synthetic_dataset: usamaahmedsh/weak-labels-wiki
+synthetic_config: triples
+synthetic_split: train
+
+col_query_id: query_id
+col_query: query
+col_pos_doc_id: pos_doc_id
+col_pos_text: pos_text
+col_neg_doc_id: neg_doc_id
+col_neg_text: neg_text
+
+# Negative-mining pool (used only by prepare_artifacts.py; training script ignores these)
+bm25_corpus_dataset: usamaahmedsh/msmarco-passage-prepared-corpus
+bm25_corpus_split: train
+bm25_corpus_docid_col: doc_id
+bm25_corpus_text_col: text
+
+# BM25 mining knobs (used only by prepare_artifacts.py)
+bm25_topk: 200
+bm25_mined_negs_per_query: 4
+bm25_min_tokens: 3
+
+# Model
+model_name: roberta-base
+max_length: 384
+
+tokenizer_kwargs:
+  truncation: true
+  padding: true
+
+# Attention backend (GPU speed)
+attn_implementation: sdpa
+
+# Training
+num_epochs: 10
+lr: 1.0e-5
+train_batch_size: 290
+eval_batch_size: 128
+grad_accum: 1
+warmup_ratio: 0.03
+
+# Optimizer / scheduler / regularization
+optim: adamw_torch
+lr_scheduler_type: cosine   # supported string values include "cosine" and "linear". [web:159]
+weight_decay: 0.02
+adam_beta1: 0.9
+adam_beta2: 0.999
+adam_epsilon: 1.0e-8
+max_grad_norm: 0.5
+
+# Pairwise margin loss
+margin: 1.0
+
+# Splits + logging/checkpoints
+dev_ratio: 0.01
+seed: 42
+logging_steps: 50
+
+# More frequent eval/checkpointing improves best-model selection and makes early stopping responsive.
+eval_steps: 500
+save_steps: 500
+save_total_limit: 5
+
+# Best checkpoint selection / overfitting control
+load_best_model_at_end: true
+metric_for_best_model: eval_loss   # Trainer accepts metric names with/without "eval_" prefix. [web:100]
+greater_is_better: false
+
+# Early stopping callback settings (0 disables)
+# Early stopping depends on load_best_model_at_end and is delayed if save_steps != eval_steps. [web:162]
+early_stopping_patience: 2
+early_stopping_threshold: 0.0
+
+# Dataloader workers
+num_workers: 6
+pin_memory: true
+persistent_workers: true
+
+# Precision (H200)
+bf16: true
+fp16: false

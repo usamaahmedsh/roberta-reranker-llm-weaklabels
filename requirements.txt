@@ -1,0 +1,11 @@
+
+sentence-transformers>=4.1.0
+transformers>=4.41.0
+torch>=2.1
+accelerate
+datasets
+tensorboard
+pyyaml
+tqdm
+numpy
+rank-bm25

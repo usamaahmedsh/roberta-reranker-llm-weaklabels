@@ -1,0 +1,53 @@
+#!/bin/bash
+#$ -N reranker_prepare
+#$ -cwd
+#$ -j y
+#$ -P rhino-ffm
+
+# Put logs inside reranker_ce (absolute path)
+LOGDIR=/project/rhino-ffm/reranker_ce/logs
+#$ -o /project/rhino-ffm/reranker_ce/logs/$JOB_NAME.$JOB_ID.log
+
+# Request CPU slots on one node
+#$ -pe omp 32
+
+# Walltime (adjust if needed)
+#$ -l h_rt=11:30:00
+
+set -euo pipefail
+
+mkdir -p "$LOGDIR"
+
+echo "Job started: $(date)"
+echo "Host: $(hostname)"
+echo "NSLOTS=${NSLOTS:-unset}"
+echo "PWD: $(pwd)"
+
+# --- Activate env ---
+source .venv/bin/activate
+
+# --- Put HF caches + temp on scratch to avoid quota issues ---
+export SCRATCH=/scratch/$USER/hf
+mkdir -p "$SCRATCH" "$SCRATCH/tmp" "$SCRATCH/datasets"
+
+export HF_HOME="$SCRATCH"
+export TMPDIR="$SCRATCH/tmp"
+export TEMP="$SCRATCH/tmp"
+export TMP="$SCRATCH/tmp"
+
+# --- Avoid oversubscription inside each process ---
+export OMP_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+export NUMEXPR_NUM_THREADS=1
+export TOKENIZERS_PARALLELISM=false
+
+# --- Run ---
+python src/prepare_artifacts.py \
+  --config configs/train.yaml \
+  --num_proc 32 \
+  --tok_batch_size 2048 \
+  --force \
+  --cache_dir "$HF_HOME/datasets"
+
+echo "Job finished: $(date)"

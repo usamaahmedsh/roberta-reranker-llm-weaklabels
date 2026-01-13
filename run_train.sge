@@ -1,0 +1,32 @@
+#!/bin/bash -l
+#$ -P rhino-ffm
+
+# Resources
+#$ -l gpus=1
+#$ -l gpu_type=H200
+#$ -pe omp 8
+#$ -l h_rt=30:00:00
+
+# Job name
+#$ -N train-cross-encoder
+
+# IMPORTANT: SGE expands these at submission time, but the directory must exist.
+#$ -o logs/$JOB_NAME_$JOB_ID.out
+#$ -e logs/$JOB_NAME_$JOB_ID.err
+
+set -euo pipefail
+
+# Ensure log dir exists (SGE may fail or redirect if paths aren't writable)
+mkdir -p logs
+
+# Optional: helpful runtime info
+echo "[job] host=$(hostname) job_id=${JOB_ID:-unknown} job_name=${JOB_NAME:-unknown}"  # JOB_ID/JOB_NAME are set by SGE. [web:203]
+
+# Modules
+module load cuda/12.8
+module load python3/3.10.12
+module load cmake/3.31.7
+
+# Run
+chmod +x scripts/bootstrap_env.sh
+bash scripts/bootstrap_env.sh
