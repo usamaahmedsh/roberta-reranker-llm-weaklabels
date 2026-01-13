@@ -80,8 +80,3 @@ Do not commit large checkpoints or model weight files to GitHub. Push model weig
 
 ## License
 Add a license that matches your intended usage (e.g., MIT/Apache-2.0) and ensure it is compatible with any upstream model/data constraints.
-
-## Citation
-If you use this repo/model in academic work, cite your paper/tech report here (add BibTeX once available).
-
-If you want, share (1) your preferred license and (2) the exact script filenames you’ll commit (train/eval/prepare), and I’ll adjust the repo layout + command examples to match.
