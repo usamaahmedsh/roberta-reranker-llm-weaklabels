@@ -55,7 +55,7 @@ scores = logits.view(-1).tolist()
 print(scores)  # higher = more relevant
 ```
 
-Evaluation (MS MARCO reranking)
+## Evaluation (MS MARCO reranking)
 Evaluation follows a common reranking setup: take an initial candidate set (e.g., BM25 top-1000), score each (query, passage) pair with the cross-encoder, sort by score, and compute ranking metrics like MRR@10 / nDCG@k / Recall@k. MS MARCO passage ranking is commonly reported with MRR@10. [web:39]
 
 Example:
@@ -67,7 +67,7 @@ python eval_comparison.py \
   --batch_size 128 \
   --max_length 384
 ```
-Training
+## Training
 Training is implemented with sentence-transformers cross-encoder utilities (trainer/args) and a ranking-style objective (pairwise/groupwise depending on the run configuration). The Sentence-Transformers reranker training approach is described in the Hugging Face reranker training guide. [web:54]
 
 Example:
@@ -75,13 +75,13 @@ Example:
 ```bash
 python train_cross_encoder.py --config configs/train.yaml
 ```
-Notes on artifacts
+## Notes on artifacts
 Do not commit large checkpoints or model weight files to GitHub. Push model weights to Hugging Face Hub and keep GitHub for code/configs; use .gitignore for runs/**/checkpoints/ and runs/**/final_model/.
 
-License
+## License
 Add a license that matches your intended usage (e.g., MIT/Apache-2.0) and ensure it is compatible with any upstream model/data constraints.
 
-Citation
+## Citation
 If you use this repo/model in academic work, cite your paper/tech report here (add BibTeX once available).
 
 If you want, share (1) your preferred license and (2) the exact script filenames you’ll commit (train/eval/prepare), and I’ll adjust the repo layout + command examples to match.
